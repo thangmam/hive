@@ -13,7 +13,8 @@ class ChangeNotifier {
   ChangeNotifier.debug(this._streamController);
 
   void notify(Frame frame) {
-    _streamController.add(BoxEvent(frame.key, frame.value, frame.deleted));
+    final event = BoxEvent(frame.key, frame.value, deleted: frame.deleted);
+    _streamController.add(event);
   }
 
   Stream<BoxEvent> watch({dynamic key}) {

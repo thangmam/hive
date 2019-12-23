@@ -59,7 +59,7 @@ void main() {
     });
 
     test('.writeInt32()', () {
-      var bd = ByteData(4);
+      final bd = ByteData(4);
 
       var bw = getWriter();
       bw.writeInt32(0);
@@ -100,7 +100,7 @@ void main() {
     });
 
     test('.writeUint32()', () {
-      var bd = ByteData(4);
+      final bd = ByteData(4);
 
       var bw = getWriter();
       bw.writeUint32(0);
@@ -126,7 +126,7 @@ void main() {
     });
 
     test('.writeInt()', () {
-      var bd = ByteData(8);
+      final bd = ByteData(8);
 
       var bw = getWriter();
       bw.writeInt(0);
@@ -157,7 +157,7 @@ void main() {
     });
 
     test('.writeDouble()', () {
-      var bd = ByteData(8);
+      final bd = ByteData(8);
 
       var bw = getWriter();
       bw.writeDouble(0);
@@ -401,14 +401,14 @@ void main() {
     });
 
     group('.writeHiveList()', () {
-      var box = BoxMock();
+      final box = BoxMock();
       when(box.name).thenReturn('Box');
 
-      var obj = TestHiveObject()..init('key', box);
+      final obj = TestHiveObject()..init('key', box);
 
       test('write length', () {
-        var list = HiveList(box, objects: [obj]);
-        var bw = getWriter();
+        final list = HiveList(box, objects: [obj]);
+        final bw = getWriter();
         bw.writeHiveList(list);
 
         expect(bw.toBytes(), [
@@ -418,8 +418,8 @@ void main() {
       });
 
       test('omit length', () {
-        var list = HiveList(box, objects: [obj]);
-        var bw = getWriter();
+        final list = HiveList(box, objects: [obj]);
+        final bw = getWriter();
         bw.writeHiveList(list, writeLength: false);
 
         expect(bw.toBytes(), [
@@ -432,7 +432,7 @@ void main() {
     group('.writeFrame()', () {
       test('normal', () {
         testFrames.forEachIndexed((frame, i) {
-          var writer = BinaryWriterImpl(testRegistry);
+          final writer = BinaryWriterImpl(testRegistry);
           expect(writer.writeFrame(frame), frameBytes[i].length);
           expect(writer.toBytes(), frameBytes[i]);
         });
@@ -440,7 +440,7 @@ void main() {
 
       test('encrypted', () {
         testFrames.forEachIndexed((frame, i) {
-          var writer = BinaryWriterImpl(testRegistry);
+          final writer = BinaryWriterImpl(testRegistry);
           expect(writer.writeFrame(frame, crypto: testCrypto),
               frameBytesEncrypted[i].length);
           expect(writer.toBytes(), frameBytesEncrypted[i]);
@@ -460,7 +460,7 @@ void main() {
       });
 
       test('int', () {
-        var bd = ByteData(8)..setFloat64(0, 12345, Endian.little);
+        final bd = ByteData(8)..setFloat64(0, 12345, Endian.little);
 
         var bw = getWriter();
         bw.write(12345, writeTypeId: false);
@@ -472,7 +472,7 @@ void main() {
       });
 
       test('double', () {
-        var bd = ByteData(8)..setFloat64(0, 123.456, Endian.little);
+        final bd = ByteData(8)..setFloat64(0, 123.456, Endian.little);
 
         var bw = getWriter();
         bw.write(123.456, writeTypeId: false);
@@ -505,12 +505,12 @@ void main() {
       });
 
       test('HiveList', () {
-        var box = BoxMock();
+        final box = BoxMock();
         when(box.name).thenReturn('Box');
 
-        var obj = TestHiveObject()..init('key', box);
-        var list = HiveList(box, objects: [obj]);
-        var bw = getWriter();
+        final obj = TestHiveObject()..init('key', box);
+        final list = HiveList(box, objects: [obj]);
+        final bw = getWriter();
         bw.write(list);
 
         expect(bw.toBytes(), [
@@ -532,7 +532,7 @@ void main() {
       });
 
       test('int list', () {
-        var bd = ByteData(20)
+        final bd = ByteData(20)
           ..setUint32(0, 2, Endian.little)
           ..setFloat64(4, 123, Endian.little)
           ..setFloat64(12, 45, Endian.little);
@@ -547,7 +547,7 @@ void main() {
       });
 
       test('double list', () {
-        var bd = ByteData(20)
+        final bd = ByteData(20)
           ..setUint32(0, 2, Endian.little)
           ..setFloat64(4, 123.456, Endian.little)
           ..setFloat64(12, 456.321, Endian.little);
@@ -562,7 +562,7 @@ void main() {
       });
 
       test('bool list', () {
-        var bd = ByteData(6)
+        final bd = ByteData(6)
           ..setUint32(0, 2, Endian.little)
           ..setUint8(4, 0)
           ..setUint8(5, 1);
@@ -595,7 +595,7 @@ void main() {
       });
 
       test('list with null', () {
-        var bd = ByteData(23)
+        final bd = ByteData(23)
           ..setUint32(0, 3, Endian.little)
           ..setUint8(4, FrameValueType.intT.index)
           ..setFloat64(5, 123, Endian.little)

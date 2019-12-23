@@ -25,7 +25,7 @@ void main() {
     });
 
     test('.cast()', () {
-      List dynamicList = testList;
+      final dynamicList = testList;
       expect(dynamicList.cast<String>(), isA<List<String>>());
     });
 

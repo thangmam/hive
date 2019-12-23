@@ -17,7 +17,7 @@ class TypeRegistryImpl implements TypeRegistry {
   final _typeAdapters = <int, _ResolvedAdapter>{};
 
   _ResolvedAdapter findAdapterForValue(dynamic value) {
-    for (var adapter in _typeAdapters.values) {
+    for (final adapter in _typeAdapters.values) {
       if (adapter.matches(value)) return adapter;
     }
     return null;
@@ -33,7 +33,7 @@ class TypeRegistryImpl implements TypeRegistry {
       throw HiveError('TypeId $typeId not allowed.');
     }
 
-    var updatedTypeId = typeId + reservedTypeIds;
+    final updatedTypeId = typeId + reservedTypeIds;
 
     if (findAdapterForTypeId(updatedTypeId) != null) {
       throw HiveError('There is already a TypeAdapter for typeId $typeId.');
@@ -43,7 +43,7 @@ class TypeRegistryImpl implements TypeRegistry {
   }
 
   void registerInternal<T>(TypeAdapter<T> adapter, int typeId) {
-    var resolved = _ResolvedAdapter<T>(adapter, typeId);
+    final resolved = _ResolvedAdapter<T>(adapter, typeId);
     _typeAdapters[typeId] = resolved;
   }
 

@@ -24,10 +24,10 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   Future<E> get(dynamic key, {E defaultValue}) async {
     checkOpen();
 
-    var frame = keystore.get(key);
+    final frame = keystore.get(key);
 
     if (frame != null) {
-      var value = await backend.readValue(frame);
+      final value = await backend.readValue(frame);
       if (value is HiveObject) {
         value.init(key, this);
       }
@@ -46,8 +46,8 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   Future<void> putAll(Map<dynamic, dynamic> kvPairs) async {
     checkOpen();
 
-    var frames = <Frame>[];
-    for (var key in kvPairs.keys) {
+    final frames = <Frame>[];
+    for (final key in kvPairs.keys) {
       frames.add(Frame(key, kvPairs[key]));
       if (key is int) {
         keystore.updateAutoIncrement(key);
@@ -57,7 +57,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     if (frames.isEmpty) return;
     await backend.writeFrames(frames);
 
-    for (var frame in frames) {
+    for (final frame in frames) {
       if (frame.value is HiveObject) {
         (frame.value as HiveObject).init(frame.key, this);
       }
@@ -71,8 +71,8 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
   Future<void> deleteAll(Iterable<dynamic> keys) async {
     checkOpen();
 
-    var frames = <Frame>[];
-    for (var key in keys) {
+    final frames = <Frame>[];
+    for (final key in keys) {
       if (keystore.containsKey(key)) {
         frames.add(Frame.deleted(key));
       }
@@ -81,7 +81,7 @@ class LazyBoxImpl<E> extends BoxBaseImpl<E> implements LazyBox<E> {
     if (frames.isEmpty) return;
     await backend.writeFrames(frames);
 
-    for (var frame in frames) {
+    for (final frame in frames) {
       keystore.insert(frame);
     }
 

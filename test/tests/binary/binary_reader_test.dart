@@ -22,8 +22,8 @@ BinaryReaderImpl fromBytes(List<int> bytes) {
 void main() {
   group('BinaryReader', () {
     test('.skip()', () {
-      var byteData = ByteData(20);
-      var br = fromByteData(byteData);
+      final byteData = ByteData(20);
+      final br = fromByteData(byteData);
 
       expect(br.availableBytes, 20);
       expect(br.usedBytes, 0);
@@ -44,11 +44,11 @@ void main() {
     });
 
     test('.readByte()', () {
-      var byteData = ByteData(3)
+      final byteData = ByteData(3)
         ..setUint8(0, 0)
         ..setUint8(1, 17)
         ..setUint8(2, 255);
-      var br = fromByteData(byteData);
+      final br = fromByteData(byteData);
 
       expect(br.readByte(), 0);
       expect(br.readByte(), 17);
@@ -57,13 +57,13 @@ void main() {
     });
 
     test('.viewBytes()', () {
-      var byteData = ByteData(3)
+      final byteData = ByteData(3)
         ..setUint8(0, 0)
         ..setUint8(1, 17)
         ..setUint8(2, 255);
-      var br = fromByteData(byteData);
+      final br = fromByteData(byteData);
 
-      var bytes = br.viewBytes(3);
+      final bytes = br.viewBytes(3);
       expect(bytes, [0, 17, 255]);
 
       byteData.setUint8(1, 57);
@@ -73,21 +73,21 @@ void main() {
     });
 
     test('.peekBytes()', () {
-      var byteData = ByteData(3)
+      final byteData = ByteData(3)
         ..setUint8(0, 0)
         ..setUint8(1, 17)
         ..setUint8(2, 255);
-      var br = fromByteData(byteData);
+      final br = fromByteData(byteData);
 
       expect(br.peekBytes(3), [0, 17, 255]);
       expect(br.viewBytes(3), [0, 17, 255]);
     });
 
     test('.readWord()', () {
-      var byteData = ByteData(4)
+      final byteData = ByteData(4)
         ..setUint16(0, 0, Endian.little)
         ..setUint16(2, 65535, Endian.little);
-      var br = fromByteData(byteData);
+      final br = fromByteData(byteData);
 
       expect(br.readWord(), 0);
       expect(br.readWord(), 65535);
@@ -95,11 +95,11 @@ void main() {
     });
 
     test('.readInt32()', () {
-      var byteData = ByteData(12)
+      final byteData = ByteData(12)
         ..setInt32(0, 0, Endian.little)
         ..setInt32(4, 65535, Endian.little)
         ..setInt32(8, -65536, Endian.little);
-      var br = fromByteData(byteData);
+      final br = fromByteData(byteData);
 
       expect(br.readInt32(), 0);
       expect(br.readInt32(), 65535);
@@ -108,10 +108,10 @@ void main() {
     });
 
     test('.readUint32()', () {
-      var byteData = ByteData(8)
+      final byteData = ByteData(8)
         ..setUint32(0, 0, Endian.little)
         ..setUint32(4, 4294967295, Endian.little);
-      var br = fromByteData(byteData);
+      final br = fromByteData(byteData);
 
       expect(br.readUint32(), 0);
       expect(br.readUint32(), 4294967295);
@@ -119,11 +119,11 @@ void main() {
     });
 
     test('.readInt()', () {
-      var byteData = ByteData(24)
+      final byteData = ByteData(24)
         ..setFloat64(0, 0, Endian.little)
         ..setFloat64(8, (2 ^ 53).toDouble(), Endian.little)
         ..setFloat64(16, (-2 ^ 53).toDouble(), Endian.little);
-      var br = fromByteData(byteData);
+      final br = fromByteData(byteData);
 
       expect(br.readInt(), 0);
       expect(br.readInt(), 2 ^ 53);
@@ -132,14 +132,14 @@ void main() {
     });
 
     test('.readDouble()', () {
-      var byteData = ByteData(48)
+      final byteData = ByteData(48)
         ..setFloat64(0, 0, Endian.little)
         ..setFloat64(8, double.nan, Endian.little)
         ..setFloat64(16, double.infinity, Endian.little)
         ..setFloat64(24, double.negativeInfinity, Endian.little)
         ..setFloat64(32, double.maxFinite, Endian.little)
         ..setFloat64(40, double.minPositive, Endian.little);
-      var br = fromByteData(byteData);
+      final br = fromByteData(byteData);
 
       expect(br.readDouble(), 0);
       expect(br.readDouble().isNaN, true);
@@ -151,11 +151,11 @@ void main() {
     });
 
     test('.readBool()', () {
-      var byteData = ByteData(3)
+      final byteData = ByteData(3)
         ..setUint8(0, 1)
         ..setUint8(1, 0)
         ..setUint8(2, 2);
-      var br = fromByteData(byteData);
+      final br = fromByteData(byteData);
 
       expect(br.readBool(), true);
       expect(br.readBool(), false);
@@ -327,41 +327,41 @@ void main() {
 
     group('.readKey()', () {
       test('int key', () {
-        var br = fromBytes([0, 123, 0, 0, 0]);
+        final br = fromBytes([0, 123, 0, 0, 0]);
         expect(br.readKey(), 123);
       });
 
       test('string key', () {
-        var br = fromBytes([1, 2, 104, 105]);
+        final br = fromBytes([1, 2, 104, 105]);
         expect(br.readKey(), 'hi');
       });
 
       test('wrong key type', () {
-        var br = fromBytes([2, 0, 0, 0, 0]);
+        final br = fromBytes([2, 0, 0, 0, 0]);
         expect(() => br.readKey(), throwsHiveError('unsupported key type'));
       });
     });
 
     group('.readHiveList()', () {
       test('read length', () {
-        var br = fromBytes([
+        final br = fromBytes([
           2, 0, 0, 0, //
           3, 66, 111, 120, //
           0, 123, 0, 0, 0, //
           1, 2, 104, 105, //
         ]);
-        var hiveList = br.readHiveList() as HiveListImpl;
+        final hiveList = br.readHiveList() as HiveListImpl;
         expect(hiveList.boxName, 'Box');
         expect(hiveList.keys, [123, 'hi']);
       });
 
       test('given length', () {
-        var br = fromBytes([
+        final br = fromBytes([
           3, 66, 111, 120, //
           0, 123, 0, 0, 0, //
           1, 2, 104, 105, //
         ]);
-        var hiveList = br.readHiveList(2) as HiveListImpl;
+        final hiveList = br.readHiveList(2) as HiveListImpl;
         expect(hiveList.boxName, 'Box');
         expect(hiveList.keys, [123, 'hi']);
       });
@@ -369,10 +369,10 @@ void main() {
 
     group('.readFrame()', () {
       test('normal', () {
-        var frames = framesSetLengthOffset(testFrames, frameBytes);
+        final frames = framesSetLengthOffset(testFrames, frameBytes);
         var offset = 0;
         frames.forEachIndexed((frame, i) {
-          var reader = BinaryReaderImpl(frameBytes[i], testRegistry);
+          final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
           expectFrame(
             reader.readFrame(lazy: false, frameOffset: offset),
             frame,
@@ -382,10 +382,10 @@ void main() {
       });
 
       test('lazy', () {
-        var frames = framesSetLengthOffset(testFrames, frameBytes);
+        final frames = framesSetLengthOffset(testFrames, frameBytes);
         var offset = 0;
         frames.forEachIndexed((frame, i) {
-          var reader = BinaryReaderImpl(frameBytes[i], testRegistry);
+          final reader = BinaryReaderImpl(frameBytes[i], testRegistry);
           expectFrame(
             reader.readFrame(lazy: true, frameOffset: offset),
             frame.toLazy(),
@@ -395,10 +395,10 @@ void main() {
       });
 
       test('encrypted', () {
-        var frames = framesSetLengthOffset(testFrames, frameBytesEncrypted);
+        final frames = framesSetLengthOffset(testFrames, frameBytesEncrypted);
         var offset = 0;
         frames.forEachIndexed((frame, i) {
-          var reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
+          final reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
           expectFrame(
             reader.readFrame(
               lazy: false,
@@ -412,10 +412,10 @@ void main() {
       });
 
       test('lazy', () {
-        var frames = framesSetLengthOffset(testFrames, frameBytesEncrypted);
+        final frames = framesSetLengthOffset(testFrames, frameBytesEncrypted);
         var offset = 0;
         frames.forEachIndexed((frame, i) {
-          var reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
+          final reader = BinaryReaderImpl(frameBytesEncrypted[i], testRegistry);
           expectFrame(
             reader.readFrame(
               lazy: true,
@@ -583,14 +583,14 @@ void main() {
       });
 
       test('HiveList', () {
-        var br = fromBytes([
+        final br = fromBytes([
           FrameValueType.hiveListT.index, 2, 0, 0, 0, //
           3, 66, 111, 120, //
           0, 123, 0, 0, 0, //
           1, 2, 104, 105, //
         ]);
 
-        var hiveList = br.read() as HiveListImpl;
+        final hiveList = br.read() as HiveListImpl;
         expect(hiveList.boxName, 'Box');
         expect(hiveList.keys, [123, 'hi']);
       });

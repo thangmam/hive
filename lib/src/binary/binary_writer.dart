@@ -24,7 +24,7 @@ abstract class BinaryWriter {
   void writeDouble(double value);
 
   /// Write a boolean.
-  void writeBool(bool value);
+  void writeBool(bool value); // ignore: avoid_positional_boolean_parameters
 
   /// Encode the UTF-8 String [value] and write its bytes.
   void writeString(

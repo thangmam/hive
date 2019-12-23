@@ -22,8 +22,7 @@ class BinaryWriterImpl extends BinaryWriter {
   int _offset = 0;
 
   ByteData get _byteData {
-    _byteDataInstance ??= ByteData.view(_buffer.buffer);
-    return _byteDataInstance;
+    return _byteDataInstance ??= ByteData.view(_buffer.buffer);
   }
 
   BinaryWriterImpl(TypeRegistry typeRegistry)
@@ -35,8 +34,8 @@ class BinaryWriterImpl extends BinaryWriter {
   void _reserveBytes(int count) {
     if (_buffer.length - _offset < count) {
       // We will create a list in the range of 2-4 times larger than required.
-      var newSize = _pow2roundup((_offset + count) * 2);
-      var newBuffer = Uint8List(newSize);
+      final newSize = _pow2roundup((_offset + count) * 2);
+      final newBuffer = Uint8List(newSize);
       newBuffer.setRange(0, _offset, _buffer);
       _buffer = newBuffer;
       _byteDataInstance = null;
@@ -44,7 +43,7 @@ class BinaryWriterImpl extends BinaryWriter {
   }
 
   void _addBytes(List<int> bytes) {
-    var length = bytes.length;
+    final length = bytes.length;
     _reserveBytes(length);
     _buffer.setRange(_offset, _offset + length, bytes);
     _offset += length;
@@ -109,7 +108,7 @@ class BinaryWriterImpl extends BinaryWriter {
     bool writeByteCount = true,
     Converter<String, List<int>> encoder = BinaryWriter.utf8Encoder,
   }) {
-    var bytes = encoder.convert(value);
+    final bytes = encoder.convert(value);
     if (writeByteCount) {
       writeUint32(bytes.length);
     }
@@ -118,7 +117,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeAsciiString(String value, {bool writeLength = true}) {
-    var length = value.length;
+    final length = value.length;
 
     if (writeLength) {
       writeUint32(length);
@@ -126,7 +125,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
     _reserveBytes(length);
     for (var i = 0; i < length; i++) {
-      var codeUnit = value.codeUnitAt(i);
+      final codeUnit = value.codeUnitAt(i);
       if ((codeUnit & ~_asciiMask) != 0) {
         throw HiveError('String contains non-ASCII characters.');
       }
@@ -144,7 +143,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeIntList(List<int> list, {bool writeLength = true}) {
-    var length = list.length;
+    final length = list.length;
     if (writeLength) {
       writeUint32(length);
     }
@@ -157,7 +156,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeDoubleList(List<double> list, {bool writeLength = true}) {
-    var length = list.length;
+    final length = list.length;
     if (writeLength) {
       writeUint32(length);
     }
@@ -170,7 +169,7 @@ class BinaryWriterImpl extends BinaryWriter {
 
   @override
   void writeBoolList(List<bool> list, {bool writeLength = true}) {
-    var length = list.length;
+    final length = list.length;
     if (writeLength) {
       writeUint32(length);
     }
@@ -189,8 +188,8 @@ class BinaryWriterImpl extends BinaryWriter {
     if (writeLength) {
       writeUint32(list.length);
     }
-    for (var str in list) {
-      var strBytes = encoder.convert(str);
+    for (final str in list) {
+      final strBytes = encoder.convert(str);
       writeUint32(strBytes.length);
       _addBytes(strBytes);
     }
@@ -233,16 +232,16 @@ class BinaryWriterImpl extends BinaryWriter {
     if (writeLength) {
       writeUint32(list.length);
     }
-    var boxName = (list as HiveListImpl).boxName;
+    final boxName = (list as HiveListImpl).boxName;
     writeByte(boxName.length);
     writeAsciiString(boxName, writeLength: false);
-    for (var obj in list) {
+    for (final obj in list) {
       writeKey(obj.key);
     }
   }
 
   int writeFrame(Frame frame, {CryptoHelper crypto}) {
-    var startOffset = _offset;
+    final startOffset = _offset;
     _reserveBytes(4);
     _offset += 4; // reserve bytes for length
 
@@ -256,14 +255,14 @@ class BinaryWriterImpl extends BinaryWriter {
       }
     }
 
-    var frameLenght = _offset - startOffset + 4;
+    final frameLenght = _offset - startOffset + 4;
     _buffer.writeUint32(startOffset, frameLenght);
 
-    var crc = Crc32.compute(
+    final crc = Crc32.compute(
       _buffer,
       offset: startOffset,
       length: frameLenght - 4,
-      crc: crypto?.keyCrc ?? 0,
+      startCrc: crypto?.keyCrc ?? 0,
     );
     writeUint32(crc);
 
@@ -304,7 +303,7 @@ class BinaryWriterImpl extends BinaryWriter {
       }
       writeMap(value);
     } else {
-      var resolved = typeRegistry.findAdapterForValue(value);
+      final resolved = typeRegistry.findAdapterForValue(value);
       if (resolved == null) {
         throw HiveError('Cannot write, unknown type: ${value.runtimeType}. '
             'Did you forget to register an adapter?');
@@ -363,9 +362,9 @@ class BinaryWriterImpl extends BinaryWriter {
 
   void writeEncrypted(dynamic value, CryptoHelper crypto,
       {bool writeTypeId = true}) {
-    var valueWriter = BinaryWriterImpl(typeRegistry)
+    final valueWriter = BinaryWriterImpl(typeRegistry)
       ..write(value, writeTypeId: writeTypeId);
-    var encryptedValue = crypto.encrypt(valueWriter.toBytes());
+    final encryptedValue = crypto.encrypt(valueWriter.toBytes());
     _addBytes(encryptedValue);
   }
 
@@ -375,12 +374,12 @@ class BinaryWriterImpl extends BinaryWriter {
 
   static int _pow2roundup(int x) {
     assert(x > 0);
-    --x;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    return x + 1;
+    var val = x - 1;
+    val |= val >> 1;
+    val |= val >> 2;
+    val |= val >> 4;
+    val |= val >> 8;
+    val |= val >> 16;
+    return val + 1;
   }
 }

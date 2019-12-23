@@ -32,9 +32,9 @@ class IndexableSkipList<K, V> {
   Iterable<V> get values => _ValueIterable(head);
 
   V insert(K key, V value) {
-    var existingNode = _getNode(key);
+    final existingNode = _getNode(key);
     if (existingNode != null) {
-      var oldValue = existingNode.value;
+      final oldValue = existingNode.value;
       existingNode.value = value;
       return oldValue;
     }
@@ -48,7 +48,7 @@ class IndexableSkipList<K, V> {
       newLevel = _height++;
     }
 
-    var newNode = Node<K, V>(
+    final newNode = Node<K, V>(
       key,
       value,
       List(newLevel + 1),
@@ -59,14 +59,14 @@ class IndexableSkipList<K, V> {
     // Next & Down
     for (var level = _height - 1; level >= 0; level--) {
       while (true) {
-        var next = current.next[level];
+        final next = current.next[level];
         if (next == null || comparator(key, next.key) < 0) break;
         current = next;
       }
 
       // CHANGE 1 - Increase all the above node's width by 1
       if (level > newLevel) {
-        var next = current.next[level];
+        final next = current.next[level];
         if (next != null) {
           next.width[level]++;
         }
@@ -98,7 +98,7 @@ class IndexableSkipList<K, V> {
 
     // CHANGE 4 - Adjust the width of all next nodes
     for (var i = 1; i <= newLevel; i++) {
-      var next = newNode.next[i];
+      final next = newNode.next[i];
       if (next != null) {
         next.width[i] -= newNode.width[i] - 1;
       }
@@ -109,25 +109,25 @@ class IndexableSkipList<K, V> {
   }
 
   V delete(K key) {
-    var node = _getNode(key);
+    final node = _getNode(key);
     if (node == null) return null;
 
     var current = head;
     // Next & Down
     for (var level = _height - 1; level >= 0; level--) {
       while (true) {
-        var next = current.next[level];
+        final next = current.next[level];
         if (next == null || comparator(key, next.key) <= 0) break;
         current = next;
       }
 
       if (level > node.level) {
-        var next = current.next[level];
+        final next = current.next[level];
         if (next != null) {
           next.width[level]--;
         }
       } else {
-        var next = node.next[level];
+        final next = node.next[level];
         current.next[level] = next;
         if (next != null) {
           next.width[level] += node.width[level] - 1;

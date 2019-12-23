@@ -79,7 +79,7 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
   }
 
   Future<void> initialize() {
-    return backend.initialize(hive, keystore, lazy);
+    return backend.initialize(hive, keystore, lazy: lazy);
   }
 
   @override
@@ -96,15 +96,15 @@ abstract class BoxBaseImpl<E> implements BoxBase<E> {
 
   @override
   Future<int> add(E value) async {
-    var key = keystore.autoIncrement();
+    final key = keystore.autoIncrement();
     await put(key, value);
     return key;
   }
 
   @override
   Future<Iterable<int>> addAll(Iterable<E> values) async {
-    var entries = <int, E>{};
-    for (var value in values) {
+    final entries = <int, E>{};
+    for (final value in values) {
       entries[keystore.autoIncrement()] = value;
     }
     await putAll(entries);

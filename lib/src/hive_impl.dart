@@ -67,33 +67,34 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
     assert(comparator != null);
     assert(compaction != null);
     assert(path == null || bytes == null);
-    name = name.toLowerCase();
-    if (isBoxOpen(name)) {
+    final lcName = name.toLowerCase();
+    if (isBoxOpen(lcName)) {
       if (lazy) {
-        return lazyBox(name);
+        return lazyBox(lcName);
       } else {
-        return box(name);
+        return box(lcName);
       }
     } else {
-      var crypto = getCryptoHelper(key);
-      var boxPath = path ?? homePath;
+      final crypto = getCryptoHelper(key);
+      final boxPath = path ?? homePath;
 
       StorageBackend backend;
       if (bytes != null) {
         backend = StorageBackendMemory(Uint8List.fromList(bytes), crypto);
       } else {
-        backend = await _manager.open(name, boxPath, recovery, crypto);
+        backend = await _manager.open(lcName, boxPath, crypto,
+            crashRecovery: recovery);
       }
 
       BoxBaseImpl<E> box;
       if (lazy) {
-        box = LazyBoxImpl<E>(this, name, comparator, compaction, backend);
+        box = LazyBoxImpl<E>(this, lcName, comparator, compaction, backend);
       } else {
-        box = BoxImpl<E>(this, name, comparator, compaction, backend);
+        box = BoxImpl<E>(this, lcName, comparator, compaction, backend);
       }
 
       await box.initialize();
-      _boxes[name] = box;
+      _boxes[lcName] = box;
 
       return box;
     }
@@ -126,14 +127,14 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
         compactionStrategy, crashRecovery, path, null) as LazyBox<E>;
   }
 
-  BoxBase<E> getBoxInternal<E>(String name, [bool lazy]) {
-    var lowerCaseName = name.toLowerCase();
-    var box = _boxes[lowerCaseName];
+  BoxBase<E> getBoxInternal<E>(String name, {bool lazy}) {
+    final lowerCaseName = name.toLowerCase();
+    final box = _boxes[lowerCaseName];
     if (box != null) {
       if ((lazy == null || box.lazy == lazy) && box.valueType == E) {
         return box as BoxBase<E>;
       } else {
-        var typeName = box is LazyBox
+        final typeName = box is LazyBox
             ? 'LazyBox<${box.valueType}>'
             : 'Box<${box.valueType}>';
         throw HiveError('The box "$lowerCaseName" is already open '
@@ -145,16 +146,16 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
   }
 
   BoxBase getBoxWithoutCheckInternal(String name) {
-    var lowerCaseName = name.toLowerCase();
+    final lowerCaseName = name.toLowerCase();
     return _boxes[lowerCaseName];
   }
 
   @override
-  Box<E> box<E>(String name) => getBoxInternal<E>(name, false) as Box<E>;
+  Box<E> box<E>(String name) => getBoxInternal<E>(name, lazy: false) as Box<E>;
 
   @override
   LazyBox<E> lazyBox<E>(String name) =>
-      getBoxInternal<E>(name, true) as LazyBox<E>;
+      getBoxInternal<E>(name, lazy: true) as LazyBox<E>;
 
   @override
   bool isBoxOpen(String name) {
@@ -163,7 +164,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   @override
   Future<void> close() {
-    var closeFutures = _boxes.values.map((box) {
+    final closeFutures = _boxes.values.map((box) {
       return box.close();
     });
 
@@ -176,7 +177,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   @override
   Future<void> deleteBoxFromDisk(String name, {String path}) async {
-    var box = _boxes[name.toLowerCase()];
+    final box = _boxes[name.toLowerCase()];
     if (box != null) {
       await box.deleteFromDisk();
     } else {
@@ -186,7 +187,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   @override
   Future<void> deleteFromDisk() {
-    var deleteFutures = _boxes.values.toList().map((box) {
+    final deleteFutures = _boxes.values.toList().map((box) {
       return box.deleteFromDisk();
     });
 
@@ -195,7 +196,7 @@ class HiveImpl extends TypeRegistryImpl implements HiveInterface {
 
   @override
   List<int> generateSecureKey() {
-    var secureRandom = CryptoHelper.createSecureRandom();
+    final secureRandom = CryptoHelper.createSecureRandom();
     return secureRandom.nextBytes(32);
   }
 }

@@ -41,12 +41,15 @@ class StorageBackendVm extends StorageBackend {
 
   bool compactionScheduled = false;
 
-  StorageBackendVm(this.file, this.lockFile, this.crashRecovery, this.crypto)
+  StorageBackendVm(this.file, this.lockFile, this.crypto,
+      {@required this.crashRecovery})
       : frameHelper = FrameIoHelper(),
         _sync = ReadWriteSync();
 
-  StorageBackendVm.debug(this.file, this.lockFile, this.crashRecovery,
-      this.crypto, this.frameHelper, this._sync);
+  @visibleForTesting
+  StorageBackendVm.debug(
+      this.file, this.lockFile, this.crypto, this.frameHelper, this._sync,
+      {@required this.crashRecovery});
 
   @override
   String get path => file.path;
@@ -61,8 +64,8 @@ class StorageBackendVm extends StorageBackend {
   }
 
   @override
-  Future<void> initialize(
-      TypeRegistry registry, Keystore keystore, bool lazy) async {
+  Future<void> initialize(TypeRegistry registry, Keystore keystore,
+      {@required bool lazy}) async {
     this.registry = registry;
 
     lockRaf = await lockFile.open(mode: FileMode.write);
@@ -78,7 +81,7 @@ class StorageBackendVm extends StorageBackend {
 
     if (recoveryOffset != -1) {
       if (crashRecovery) {
-        print('Recovering corrupted box.');
+        print('Recovering corrupted box.'); // ignore: avoid_print
         await writeRaf.truncate(recoveryOffset);
         writeOffset = recoveryOffset;
       } else {
@@ -92,10 +95,10 @@ class StorageBackendVm extends StorageBackend {
     return _sync.syncRead(() async {
       await readRaf.setPosition(frame.offset);
 
-      var bytes = await readRaf.read(frame.length);
+      final bytes = await readRaf.read(frame.length);
 
-      var reader = BinaryReaderImpl(bytes, registry);
-      var readFrame = reader.readFrame(crypto: crypto, lazy: false);
+      final reader = BinaryReaderImpl(bytes, registry);
+      final readFrame = reader.readFrame(crypto: crypto, lazy: false);
 
       if (readFrame == null) {
         throw HiveError(
@@ -109,9 +112,9 @@ class StorageBackendVm extends StorageBackend {
   @override
   Future<void> writeFrames(List<Frame> frames) {
     return _sync.syncWrite(() async {
-      var writer = BinaryWriterImpl(registry);
+      final writer = BinaryWriterImpl(registry);
 
-      for (var frame in frames) {
+      for (final frame in frames) {
         frame.length = writer.writeFrame(frame, crypto: crypto);
       }
 
@@ -122,7 +125,7 @@ class StorageBackendVm extends StorageBackend {
         rethrow;
       }
 
-      for (var frame in frames) {
+      for (final frame in frames) {
         frame.offset = writeOffset;
         writeOffset += frame.length;
       }
@@ -136,19 +139,19 @@ class StorageBackendVm extends StorageBackend {
 
     return _sync.syncReadWrite(() async {
       await readRaf.setPosition(0);
-      var reader = BufferedFileReader(readRaf);
+      final reader = BufferedFileReader(readRaf);
 
-      var compactFile = File('${p.withoutExtension(path)}.hivec');
-      var compactRaf = await compactFile.open(mode: FileMode.write);
-      var writer = BufferedFileWriter(compactRaf);
+      final compactFile = File('${p.withoutExtension(path)}.hivec');
+      final compactRaf = await compactFile.open(mode: FileMode.write);
+      final writer = BufferedFileWriter(compactRaf);
 
-      var sortedFrames = frames.toList();
+      final sortedFrames = frames.toList();
       sortedFrames.sort((a, b) => a.offset.compareTo(b.offset));
       try {
-        for (var frame in sortedFrames) {
+        for (final frame in sortedFrames) {
           if (frame.offset == -1) continue; // Frame has not been written yet
           if (frame.offset != reader.offset) {
-            var skip = frame.offset - reader.offset;
+            final skip = frame.offset - reader.offset;
             if (reader.remainingInBuffer < skip) {
               if (await reader.loadBytes(skip) < skip) {
                 throw HiveError('Could not compact box: Unexpected EOF.');
@@ -175,7 +178,7 @@ class StorageBackendVm extends StorageBackend {
       await open();
 
       var offset = 0;
-      for (var frame in sortedFrames) {
+      for (final frame in sortedFrames) {
         if (frame.offset == -1) continue;
         frame.offset = offset;
         offset += frame.length;

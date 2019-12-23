@@ -19,7 +19,7 @@ export '../generated/frames_encrypted.g.dart';
 TypeRegistry get testRegistry => HiveImpl();
 
 CryptoHelper get testCrypto {
-  var secMock = SecureRandomMock();
+  final secMock = SecureRandomMock();
   when(secMock.nextUint8()).thenReturn(1);
   when(secMock.nextUint16()).thenReturn(2);
   when(secMock.nextUint32()).thenReturn(3);
@@ -93,7 +93,7 @@ List<Frame> get testFrames => <Frame>[
 List<Frame> framesSetLengthOffset(List<Frame> frames, List<Uint8List> bytes) {
   var offset = 0;
   for (var i = 0; i < frames.length; i++) {
-    var length = bytes[i].length;
+    final length = bytes[i].length;
     frames[i]
       ..offset = offset
       ..length = length;
@@ -151,8 +151,8 @@ void expectFrame(Frame f1, Frame f2) {
 }
 
 void expectFrames(Iterable<Frame> f1, Iterable<Frame> f2) {
-  var frames1 = f1.toList();
-  var frames2 = f2.toList();
+  final frames1 = f1.toList();
+  final frames2 = f2.toList();
 
   expect(frames1.length, f2.length);
   for (var i = 0; i < frames2.length; i++) {
@@ -160,17 +160,17 @@ void expectFrames(Iterable<Frame> f1, Iterable<Frame> f2) {
   }
 }
 
-void buildGoldens() async {
-  Future<void> generate(String fileName, String varName,
+Future<void> buildGoldens() async {
+  Future<void> generate(String fileName, String finalName,
       Uint8List Function(Frame frame) transformer) async {
-    var file = File('test/generated/$fileName.g.dart');
+    final file = File('test/generated/$fileName.g.dart');
     await file.create();
-    var code = StringBuffer();
+    final code = StringBuffer();
     code.writeln("import 'dart:typed_data';\n");
-    code.writeln('final $varName = [');
-    for (var frame in testFrames) {
+    code.writeln('final $finalName = [');
+    for (final frame in testFrames) {
       code.writeln('// ${frame.key}');
-      var bytes = transformer(frame);
+      final bytes = transformer(frame);
       code.writeln('Uint8List.fromList(${bytes.toString()}),');
     }
     code.writeln('];');
@@ -178,22 +178,22 @@ void buildGoldens() async {
   }
 
   await generate('frames', 'frameBytes', (f) {
-    var writer = BinaryWriterImpl(testRegistry);
+    final writer = BinaryWriterImpl(testRegistry);
     writer.writeFrame(f);
     return writer.toBytes();
   });
   await generate('frame_values', 'frameValuesBytes', (f) {
-    var writer = BinaryWriterImpl(HiveImpl())
+    final writer = BinaryWriterImpl(HiveImpl())
       ..write(f.value, writeTypeId: false);
     return writer.toBytes();
   });
   await generate('frames_encrypted', 'frameBytesEncrypted', (f) {
-    var writer = BinaryWriterImpl(testRegistry);
+    final writer = BinaryWriterImpl(testRegistry);
     writer.writeFrame(f, crypto: testCrypto);
     return writer.toBytes();
   });
   await generate('frame_values_encrypted', 'frameValuesBytesEncrypted', (f) {
-    var writer = BinaryWriterImpl(HiveImpl())
+    final writer = BinaryWriterImpl(HiveImpl())
       ..writeEncrypted(f.value, testCrypto, writeTypeId: false);
     return writer.toBytes();
   });

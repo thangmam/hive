@@ -33,23 +33,24 @@ class _TestObjectAdapter extends TypeAdapter<_TestObject> {
 
 void main() {
   test('add and remove objects to / from HiveList', () async {
-    var hive = HiveImpl();
+    final hive = HiveImpl();
     hive.registerAdapter(_TestObjectAdapter(), 0);
-    var box = await openBox<_TestObject>(false, hive: hive) as Box<_TestObject>;
+    var box =
+        await openBox<_TestObject>(lazy: false, hive: hive) as Box<_TestObject>;
 
     var obj = _TestObject('obj');
     obj.list = HiveListImpl(box);
     await box.put('obj', obj);
 
     for (var i = 0; i < 100; i++) {
-      var element = _TestObject('element$i');
+      final element = _TestObject('element$i');
       await box.add(element);
       obj.list.add(element);
     }
 
     await obj.save();
 
-    box = (await box.reopen()) as Box<_TestObject>;
+    box = await box.reopen() as Box<_TestObject>;
     obj = box.get('obj');
     (obj.list as HiveListImpl).debugHive = hive;
 

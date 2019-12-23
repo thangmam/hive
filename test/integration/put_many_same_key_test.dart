@@ -6,12 +6,12 @@ import '../util/is_browser.dart';
 import 'integration.dart';
 
 Future _performTest(bool lazy) async {
-  var amount = isBrowser ? 5 : 100;
-  var box = await openBox(lazy);
+  final amount = isBrowser ? 5 : 100;
+  var box = await openBox(lazy: lazy);
 
   for (var i = 0; i < amount; i++) {
     for (var n = 0; n < 100; n++) {
-      var completer = Completer();
+      final completer = Completer();
       scheduleMicrotask(() async {
         await box.put('string$i', 'test$n');
         await box.put('int$i', n);

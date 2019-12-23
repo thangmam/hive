@@ -22,8 +22,8 @@ class FrameIoHelper extends FrameHelper {
 
   Future<int> keysFromFile(
       String path, Keystore keystore, CryptoHelper crypto) async {
-    var raf = await openFile(path);
-    var fileReader = BufferedFileReader(raf);
+    final raf = await openFile(path);
+    final fileReader = BufferedFileReader(raf);
     try {
       return await _KeyReader(fileReader).readKeys(keystore, crypto);
     } finally {
@@ -33,7 +33,7 @@ class FrameIoHelper extends FrameHelper {
 
   Future<int> framesFromFile(String path, Keystore keystore,
       TypeRegistry registry, CryptoHelper crypto) async {
-    var bytes = await readFile(path);
+    final bytes = await readFile(path);
     return framesFromBytes(bytes as Uint8List, keystore, registry, crypto);
   }
 }
@@ -48,10 +48,10 @@ class _KeyReader {
   Future<int> readKeys(Keystore keystore, CryptoHelper crypto) async {
     await _load(4);
     while (true) {
-      var frameOffset = fileReader.offset;
+      final frameOffset = fileReader.offset;
 
       if (_reader.availableBytes < 4) {
-        var available = await _load(4);
+        final available = await _load(4);
         if (available == 0) {
           break;
         } else if (available < 4) {
@@ -59,13 +59,13 @@ class _KeyReader {
         }
       }
 
-      var frameLength = _reader.peekUint32();
+      final frameLength = _reader.peekUint32();
       if (_reader.availableBytes < frameLength) {
-        var available = await _load(frameLength);
+        final available = await _load(frameLength);
         if (available < frameLength) return frameOffset;
       }
 
-      var frame = _reader.readFrame(
+      final frame = _reader.readFrame(
         crypto: crypto,
         lazy: true,
         frameOffset: frameOffset,
@@ -81,8 +81,8 @@ class _KeyReader {
   }
 
   Future<int> _load(int bytes) async {
-    var loadedBytes = await fileReader.loadBytes(bytes);
-    var buffer = fileReader.peekBytes(loadedBytes);
+    final loadedBytes = await fileReader.loadBytes(bytes);
+    final buffer = fileReader.peekBytes(loadedBytes);
     _reader = BinaryReaderImpl(buffer, null);
 
     return loadedBytes;

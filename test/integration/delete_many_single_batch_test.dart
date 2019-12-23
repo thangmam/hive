@@ -4,9 +4,9 @@ import '../util/is_browser.dart';
 import 'integration.dart';
 
 Future _performTest(bool lazy) async {
-  var amount = isBrowser ? 500 : 20000;
-  var box = await openBox(lazy);
-  var entries = <String, dynamic>{};
+  final amount = isBrowser ? 500 : 20000;
+  var box = await openBox(lazy: lazy);
+  final entries = <String, dynamic>{};
   for (var i = 0; i < amount; i++) {
     entries['string$i'] = 'test';
     entries['int$i'] = -i;

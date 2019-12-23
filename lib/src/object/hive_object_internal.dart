@@ -16,7 +16,7 @@ extension HiveObjectInternal on HiveObject {
   }
 
   void unload() {
-    for (var list in _hiveLists.keys) {
+    for (final list in _hiveLists.keys) {
       (list as HiveListImpl).invalidate();
     }
 

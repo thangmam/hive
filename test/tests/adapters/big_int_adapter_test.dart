@@ -9,25 +9,25 @@ void main() {
   group('BigIntAdapter', () {
     group('reads', () {
       test('positive BigInts', () {
-        var numberStr = '123456789123456789';
-        var bytes =
+        const numberStr = '123456789123456789';
+        final bytes =
             Uint8List.fromList([numberStr.length, ...numberStr.codeUnits]);
-        var reader = BinaryReaderImpl(bytes, null);
+        final reader = BinaryReaderImpl(bytes, null);
         expect(BigIntAdapter().read(reader), BigInt.parse(numberStr));
       });
 
       test('negative BigInts', () {
-        var numberStr = '-123456789123456789';
-        var bytes =
+        const numberStr = '-123456789123456789';
+        final bytes =
             Uint8List.fromList([numberStr.length, ...numberStr.codeUnits]);
-        var reader = BinaryReaderImpl(bytes, null);
+        final reader = BinaryReaderImpl(bytes, null);
         expect(BigIntAdapter().read(reader), BigInt.parse(numberStr));
       });
     });
 
     test('writes BigInts', () {
-      var numberStr = '123456789123456789';
-      var writer = BinaryWriterImpl(null);
+      const numberStr = '123456789123456789';
+      final writer = BinaryWriterImpl(null);
       BigIntAdapter().write(writer, BigInt.parse(numberStr));
       expect(writer.toBytes(), [numberStr.length, ...numberStr.codeUnits]);
     });

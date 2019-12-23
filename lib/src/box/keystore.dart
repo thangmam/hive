@@ -41,9 +41,9 @@ class Keystore<E> {
     ChangeNotifier notifier,
     KeyComparator keyComparator = defaultKeyComparator,
   }) {
-    var keystore =
+    final keystore =
         Keystore<E>(box, notifier ?? ChangeNotifier(), keyComparator);
-    for (var frame in frames) {
+    for (final frame in frames) {
       keystore.insert(frame);
     }
     return keystore;
@@ -98,11 +98,11 @@ class Keystore<E> {
   }
 
   Frame insert(Frame frame, {bool notify = true}) {
-    var value = frame.value;
+    final value = frame.value;
     Frame deletedFrame;
 
     if (!frame.deleted) {
-      var key = frame.key;
+      final key = frame.key;
       if (key is int && key > _autoIncrement) {
         _autoIncrement = key;
       }
@@ -132,13 +132,13 @@ class Keystore<E> {
   }
 
   bool beginTransaction(List<Frame> newFrames) {
-    var transaction = KeyTransaction<E>();
-    for (var frame in newFrames) {
+    final transaction = KeyTransaction<E>();
+    for (final frame in newFrames) {
       if (!frame.deleted) {
         transaction.added.add(frame.key);
       }
 
-      var deletedFrame = insert(frame);
+      final deletedFrame = insert(frame);
       if (deletedFrame != null) {
         transaction.deleted[frame.key] = deletedFrame;
       }
@@ -157,12 +157,12 @@ class Keystore<E> {
   }
 
   void cancelTransaction() {
-    var canceled = transactions.removeFirst();
+    final canceled = transactions.removeFirst();
 
     deleted_loop:
-    for (var key in canceled.deleted.keys) {
-      var deletedFrame = canceled.deleted[key];
-      for (var t in transactions) {
+    for (final key in canceled.deleted.keys) {
+      final deletedFrame = canceled.deleted[key];
+      for (final t in transactions) {
         if (t.deleted.containsKey(key)) {
           t.deleted[key] = deletedFrame;
           continue deleted_loop;
@@ -178,9 +178,9 @@ class Keystore<E> {
     }
 
     added_loop:
-    for (var key in canceled.added) {
-      var isOverride = canceled.deleted.containsKey(key);
-      for (var t in transactions) {
+    for (final key in canceled.added) {
+      final isOverride = canceled.deleted.containsKey(key);
+      for (final t in transactions) {
         if (t.deleted.containsKey(key)) {
           if (!isOverride) {
             t.deleted.remove(key);
@@ -199,11 +199,11 @@ class Keystore<E> {
   }
 
   int clear() {
-    var frameList = frames.toList();
+    final frameList = frames.toList();
 
     _store.clear();
 
-    for (var frame in frameList) {
+    for (final frame in frameList) {
       if (frame.value is HiveObject) {
         // ignore: invalid_use_of_protected_member
         (frame.value as HiveObject).unload();

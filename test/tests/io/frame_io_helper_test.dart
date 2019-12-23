@@ -11,8 +11,8 @@ import '../common.dart';
 import '../frames.dart';
 
 Uint8List _getBytes(List<Uint8List> list) {
-  var builder = BytesBuilder();
-  for (var b in list) {
+  final builder = BytesBuilder();
+  for (final b in list) {
     builder.add(b);
   }
   return builder.toBytes();
@@ -38,12 +38,13 @@ void main() {
   group('FrameIoHelper', () {
     group('.keysFromFile()', () {
       test('frame', () async {
-        var keystore = Keystore.debug();
-        var ioHelper = _FrameIoHelperTest(_getBytes(frameBytes));
-        var recoveryOffset = await ioHelper.keysFromFile(null, keystore, null);
+        final keystore = Keystore.debug();
+        final ioHelper = _FrameIoHelperTest(_getBytes(frameBytes));
+        final recoveryOffset =
+            await ioHelper.keysFromFile(null, keystore, null);
         expect(recoveryOffset, -1);
 
-        var testKeystore = Keystore.debug(
+        final testKeystore = Keystore.debug(
           frames: lazyFrames(framesSetLengthOffset(testFrames, frameBytes)),
         );
 
@@ -51,13 +52,13 @@ void main() {
       });
 
       test('encrypted', () async {
-        var keystore = Keystore.debug();
-        var ioHelper = _FrameIoHelperTest(_getBytes(frameBytesEncrypted));
-        var recoveryOffset =
+        final keystore = Keystore.debug();
+        final ioHelper = _FrameIoHelperTest(_getBytes(frameBytesEncrypted));
+        final recoveryOffset =
             await ioHelper.keysFromFile(null, keystore, testCrypto);
         expect(recoveryOffset, -1);
 
-        var testKeystore = Keystore.debug(
+        final testKeystore = Keystore.debug(
           frames: lazyFrames(
             framesSetLengthOffset(testFrames, frameBytesEncrypted),
           ),
@@ -71,13 +72,13 @@ void main() {
 
     group('.allFromFile()', () {
       test('frame', () async {
-        var keystore = Keystore.debug();
-        var ioHelper = _FrameIoHelperTest(_getBytes(frameBytes));
-        var recoveryOffset =
+        final keystore = Keystore.debug();
+        final ioHelper = _FrameIoHelperTest(_getBytes(frameBytes));
+        final recoveryOffset =
             await ioHelper.framesFromFile(null, keystore, testRegistry, null);
         expect(recoveryOffset, -1);
 
-        var testKeystore = Keystore.debug(
+        final testKeystore = Keystore.debug(
           frames: framesSetLengthOffset(testFrames, frameBytes),
         );
 
@@ -85,13 +86,13 @@ void main() {
       });
 
       test('encrypted', () async {
-        var keystore = Keystore.debug();
-        var ioHelper = _FrameIoHelperTest(_getBytes(frameBytesEncrypted));
-        var recoveryOffset = await ioHelper.framesFromFile(
+        final keystore = Keystore.debug();
+        final ioHelper = _FrameIoHelperTest(_getBytes(frameBytesEncrypted));
+        final recoveryOffset = await ioHelper.framesFromFile(
             null, keystore, testRegistry, testCrypto);
         expect(recoveryOffset, -1);
 
-        var testKeystore = Keystore.debug(
+        final testKeystore = Keystore.debug(
           frames: framesSetLengthOffset(testFrames, frameBytesEncrypted),
         );
 

@@ -29,8 +29,8 @@ const testMap = {
 };
 
 Uint8List getFrameBytes(Iterable<Frame> frames) {
-  var writer = BinaryWriterImpl(testRegistry);
-  for (var frame in frames) {
+  final writer = BinaryWriterImpl(testRegistry);
+  for (final frame in frames) {
     writer.writeFrame(frame);
   }
   return writer.toBytes();
@@ -50,10 +50,10 @@ StorageBackendVm _getBackend({
   return StorageBackendVm.debug(
     file ?? FileMock(),
     lockFile ?? FileMock(),
-    crashRecovery,
     crypto,
     ioHelper ?? FrameIoHelperMock(),
     sync ?? ReadWriteSync(),
+    crashRecovery: crashRecovery,
   )
     ..readRaf = readRaf
     ..writeRaf = writeRaf;
@@ -62,39 +62,39 @@ StorageBackendVm _getBackend({
 void main() {
   group('StorageBackendVm', () {
     test('.path returns path for of open box file', () {
-      var file = File('some/path');
-      var backend = _getBackend(file: file);
+      final file = File('some/path');
+      final backend = _getBackend(file: file);
       expect(backend.path, 'some/path');
     });
 
     test('.supportsCompaction is true', () {
-      var backend = _getBackend();
+      final backend = _getBackend();
       expect(backend.supportsCompaction, true);
     });
 
     group('.open()', () {
       test('readFile & writeFile', () async {
-        var file = FileMock();
-        var readRaf = RAFMock();
-        var writeRaf = RAFMock();
+        final file = FileMock();
+        final readRaf = RAFMock();
+        final writeRaf = RAFMock();
         when(file.open()).thenAnswer((i) => Future.value(readRaf));
         when(file.open(mode: FileMode.writeOnlyAppend))
             .thenAnswer((i) => Future.value(writeRaf));
 
-        var backend = _getBackend(file: file);
+        final backend = _getBackend(file: file);
         await backend.open();
         expect(backend.readRaf, readRaf);
         expect(backend.writeRaf, writeRaf);
       });
 
       test('writeOffset', () async {
-        var file = FileMock();
-        var writeFile = RAFMock();
+        final file = FileMock();
+        final writeFile = RAFMock();
         when(file.open(mode: FileMode.writeOnlyAppend))
             .thenAnswer((i) => Future.value(writeFile));
         when(writeFile.length()).thenAnswer((i) => Future.value(123));
 
-        var backend = _getBackend(file: file);
+        final backend = _getBackend(file: file);
         await backend.open();
         expect(backend.writeOffset, 123);
       });
@@ -102,14 +102,14 @@ void main() {
 
     group('.initialize()', () {
       File getLockFile() {
-        var lockFileMock = FileMock();
+        final lockFileMock = FileMock();
         when(lockFileMock.open(mode: FileMode.write))
             .thenAnswer((i) => Future.value(RAFMock()));
         return lockFileMock;
       }
 
       FrameIoHelper getFrameIoHelper(int recoveryOffset) {
-        var helper = FrameIoHelperMock();
+        final helper = FrameIoHelperMock();
         when(helper.framesFromFile(any, any, any, any)).thenAnswer((i) {
           return Future.value(recoveryOffset);
         });
@@ -119,64 +119,64 @@ void main() {
         return helper;
       }
 
-      void runTests(bool lazy) {
+      void runTests({bool lazy}) {
         test('opens lock file and aquires lock', () async {
-          var lockFile = FileMock();
-          var lockRaf = RAFMock();
+          final lockFile = FileMock();
+          final lockRaf = RAFMock();
           when(lockFile.open(mode: FileMode.write))
               .thenAnswer((i) => Future.value(lockRaf));
 
-          var backend = _getBackend(
+          final backend = _getBackend(
             lockFile: lockFile,
             ioHelper: getFrameIoHelper(-1),
           );
 
-          await backend.initialize(null, KeystoreMock(), lazy);
+          await backend.initialize(null, KeystoreMock(), lazy: lazy);
           verify(lockRaf.lock());
         });
 
         test('recoveryOffset with crash recovery', () async {
-          var writeRaf = RAFMock();
-          var backend = _getBackend(
+          final writeRaf = RAFMock();
+          final backend = _getBackend(
             lockFile: getLockFile(),
             ioHelper: getFrameIoHelper(20),
             crashRecovery: true,
             writeRaf: writeRaf,
           );
 
-          await backend.initialize(null, KeystoreMock(), lazy);
+          await backend.initialize(null, KeystoreMock(), lazy: lazy);
           verify(writeRaf.truncate(20));
         });
 
         test('recoveryOffset without crash recovery', () async {
-          var backend = _getBackend(
+          final backend = _getBackend(
             lockFile: getLockFile(),
             ioHelper: getFrameIoHelper(20),
             crashRecovery: false,
           );
 
           await expectLater(
-              () => backend.initialize(null, KeystoreMock(), lazy),
+              () => backend.initialize(null, KeystoreMock(), lazy: lazy),
               throwsHiveError('corrupted'));
         });
       }
 
       group('(not lazy)', () {
-        runTests(false);
+        runTests(lazy: false);
       });
 
       group('(lazy)', () {
-        runTests(true);
+        runTests(lazy: true);
       });
     });
 
     group('.readValue()', () {
       test('reads value with offset', () async {
-        var frameBytes = getFrameBytes([Frame('test', 123)]);
-        var readRaf = await getTempRaf([1, 2, 3, 4, 5, ...frameBytes]);
+        final frameBytes = getFrameBytes([Frame('test', 123)]);
+        final readRaf = await getTempRaf([1, 2, 3, 4, 5, ...frameBytes]);
 
-        var backend = _getBackend(readRaf: readRaf);
-        var value = await backend.readValue(
+        final backend = _getBackend(readRaf: readRaf);
+        final value = await backend.readValue(
           Frame('test', 123, length: frameBytes.length, offset: 5),
         );
         expect(value, 123);
@@ -185,10 +185,10 @@ void main() {
       });
 
       test('throws exception when frame cannot be read', () async {
-        var readRaf = await getTempRaf([1, 2, 3, 4, 5]);
-        var backend = _getBackend(readRaf: readRaf);
+        final readRaf = await getTempRaf([1, 2, 3, 4, 5]);
+        final backend = _getBackend(readRaf: readRaf);
 
-        var frame = Frame('test', 123, length: frameBytes.length, offset: 0);
+        final frame = Frame('test', 123, length: frameBytes.length, offset: 0);
         await expectLater(
             () => backend.readValue(frame), throwsHiveError('corrupted'));
 
@@ -198,21 +198,21 @@ void main() {
 
     group('.writeFrames()', () {
       test('writes bytes', () async {
-        var frames = [Frame('key1', 'value'), Frame('key2', null)];
-        var bytes = getFrameBytes(frames);
+        final frames = [Frame('key1', 'value'), Frame('key2', null)];
+        final bytes = getFrameBytes(frames);
 
-        var writeRaf = RAFMock();
-        var backend = _getBackend(writeRaf: writeRaf);
+        final writeRaf = RAFMock();
+        final backend = _getBackend(writeRaf: writeRaf);
 
         await backend.writeFrames(frames);
         verify(writeRaf.writeFrom(bytes));
       });
 
       test('updates offsets', () async {
-        var frames = [Frame('key1', 'value'), Frame('key2', null)];
+        final frames = [Frame('key1', 'value'), Frame('key2', null)];
 
-        var writeRaf = RAFMock();
-        var backend = _getBackend(writeRaf: writeRaf);
+        final writeRaf = RAFMock();
+        final backend = _getBackend(writeRaf: writeRaf);
         backend.writeOffset = 5;
 
         await backend.writeFrames(frames);
@@ -224,9 +224,9 @@ void main() {
       });
 
       test('resets writeOffset on error', () async {
-        var writeRaf = RAFMock();
+        final writeRaf = RAFMock();
         when(writeRaf.writeFrom(any)).thenThrow('error');
-        var backend = _getBackend(writeRaf: writeRaf);
+        final backend = _getBackend(writeRaf: writeRaf);
         backend.writeOffset = 123;
 
         await expectLater(() => backend.writeFrames([Frame('key1', 'value')]),
@@ -239,12 +239,12 @@ void main() {
     /*group('.compact()', () {
       //TODO improve this test
       test('check compaction', () async {
-        var bytes = BytesBuilder();
-        var comparisonBytes = BytesBuilder();
-        var entries = <String, Frame>{};
+        final bytes = BytesBuilder();
+        final comparisonBytes = BytesBuilder();
+        final entries = <String, Frame>{};
 
         void addFrame(String key, dynamic val, [bool keep = false]) {
-          var frameBytes = Frame(key, val).toBytes(null, null);
+          final frameBytes = Frame(key, val).toBytes(null, null);
           if (keep) {
             entries[key] = Frame(key, val,
                 length: frameBytes.length, offset: bytes.length);
@@ -255,42 +255,42 @@ void main() {
           bytes.add(frameBytes);
         }
 
-        for (var i = 0; i < 1000; i++) {
-          for (var key in testMap.keys) {
+        for (final i = 0; i < 1000; i++) {
+          for (final key in testMap.keys) {
             addFrame(key, testMap[key]);
             addFrame(key, null);
           }
         }
 
-        for (var key in testMap.keys) {
+        for (final key in testMap.keys) {
           addFrame(key, 12345);
           addFrame(key, null);
           addFrame(key, 'This is a test');
           addFrame(key, testMap[key], true);
         }
 
-        var boxFile = await getTempFile();
+        final boxFile = await getTempFile();
         await boxFile.writeAsBytes(bytes.toBytes());
 
-        var syncedFile = SyncedFile(boxFile.path);
+        final syncedFile = SyncedFile(boxFile.path);
         await syncedFile.open();
-        var backend = StorageBackendVm(syncedFile, null);
+        final backend = StorageBackendVm(syncedFile, null);
 
         await backend.compact(entries.values);
 
-        var compactedBytes = await File(backend.path).readAsBytes();
+        final compactedBytes = await File(backend.path).readAsBytes();
         expect(compactedBytes, comparisonBytes.toBytes());
 
         await backend.close();
       });
 
       test('throws error if corrupted', () async {
-        var bytes = BytesBuilder();
-        var boxFile = await getTempFile(); 
-        var syncedFile = SyncedFile(boxFile.path);
+        final bytes = BytesBuilder();
+        final boxFile = await getTempFile(); 
+        final syncedFile = SyncedFile(boxFile.path);
         await syncedFile.open();
 
-        var box = BoxImplVm(
+        final box = BoxImplVm(
             HiveImpl(), path.basename(boxFile.path), BoxOptions(), syncedFile);
         await box.put('test', true);
         await box.put('test2', 'hello');
@@ -303,8 +303,8 @@ void main() {
     });*/
 
     test('.clear()', () async {
-      var writeRaf = RAFMock();
-      var backend = _getBackend(writeRaf: writeRaf);
+      final writeRaf = RAFMock();
+      final backend = _getBackend(writeRaf: writeRaf);
       backend.writeOffset = 111;
 
       await backend.clear();
@@ -314,12 +314,12 @@ void main() {
     });
 
     test('.close()', () async {
-      var readRaf = RAFMock();
-      var writeRaf = RAFMock();
-      var lockRaf = RAFMock();
-      var lockFile = FileMock();
+      final readRaf = RAFMock();
+      final writeRaf = RAFMock();
+      final lockRaf = RAFMock();
+      final lockFile = FileMock();
 
-      var backend = _getBackend(
+      final backend = _getBackend(
         lockFile: lockFile,
         readRaf: readRaf,
         writeRaf: writeRaf,
@@ -336,13 +336,13 @@ void main() {
     });
 
     test('.deleteFromDisk()', () async {
-      var readRaf = RAFMock();
-      var writeRaf = RAFMock();
-      var lockRaf = RAFMock();
-      var lockFile = FileMock();
-      var file = FileMock();
+      final readRaf = RAFMock();
+      final writeRaf = RAFMock();
+      final lockRaf = RAFMock();
+      final lockFile = FileMock();
+      final file = FileMock();
 
-      var backend = _getBackend(
+      final backend = _getBackend(
         file: file,
         lockFile: lockFile,
         readRaf: readRaf,

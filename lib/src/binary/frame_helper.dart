@@ -8,12 +8,12 @@ import 'package:hive/src/crypto_helper.dart';
 class FrameHelper {
   int framesFromBytes(Uint8List bytes, Keystore keystore, TypeRegistry registry,
       CryptoHelper crypto) {
-    var reader = BinaryReaderImpl(bytes, registry);
+    final reader = BinaryReaderImpl(bytes, registry);
 
     while (reader.availableBytes != 0) {
-      var frameOffset = reader.usedBytes;
+      final frameOffset = reader.usedBytes;
 
-      var frame = reader.readFrame(
+      final frame = reader.readFrame(
         crypto: crypto,
         lazy: false,
         frameOffset: frameOffset,

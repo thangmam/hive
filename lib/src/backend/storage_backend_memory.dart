@@ -6,6 +6,7 @@ import 'package:hive/src/binary/frame.dart';
 import 'package:hive/src/binary/frame_helper.dart';
 import 'package:hive/src/box/keystore.dart';
 import 'package:hive/src/crypto_helper.dart';
+import 'package:meta/meta.dart';
 
 class StorageBackendMemory extends StorageBackend {
   final CryptoHelper crypto;
@@ -23,8 +24,9 @@ class StorageBackendMemory extends StorageBackend {
   bool supportsCompaction = false;
 
   @override
-  Future<void> initialize(TypeRegistry registry, Keystore keystore, bool lazy) {
-    var recoveryOffset =
+  Future<void> initialize(TypeRegistry registry, Keystore keystore,
+      {@required bool lazy}) {
+    final recoveryOffset =
         frameHelper.framesFromBytes(_bytes, keystore, registry, crypto);
 
     if (recoveryOffset != -1) {

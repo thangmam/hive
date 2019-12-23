@@ -4,11 +4,11 @@ class Crc32 {
   ///
   static int compute(
     List<int> bytes, {
-    int crc = 0,
+    int startCrc = 0,
     int offset = 0,
     int length,
   }) {
-    crc = crc ^ 0xffffffff;
+    var crc = startCrc ^ 0xffffffff;
 
     length ??= bytes.length;
 

@@ -7,8 +7,8 @@ import '../mocks.dart';
 void main() {
   group('BufferedFileWriter', () {
     test('.write()', () async {
-      var file = RAFMock();
-      var writer = BufferedFileWriter(file, 10);
+      final file = RAFMock();
+      final writer = BufferedFileWriter(file, 10);
 
       await writer.write([1, 2, 3, 4, 5, 6]);
       await writer.write([7, 8, 9, 10]);
@@ -26,8 +26,8 @@ void main() {
     });
 
     test('flush()', () async {
-      var file = RAFMock();
-      var writer = BufferedFileWriter(file, 10);
+      final file = RAFMock();
+      final writer = BufferedFileWriter(file, 10);
 
       await writer.flush();
       verifyZeroInteractions(file);

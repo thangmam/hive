@@ -17,7 +17,7 @@ BoxImpl _getBox({
   CompactionStrategy cStrategy,
   StorageBackend backend,
 }) {
-  var box = BoxImpl(
+  final box = BoxImpl(
     hive ?? HiveImpl(),
     name ?? 'testBox',
     null,
@@ -31,20 +31,20 @@ BoxImpl _getBox({
 void main() {
   group('BoxImpl', () {
     test('.values', () {
-      var keystore = Keystore.debug(frames: [
+      final keystore = Keystore.debug(frames: [
         Frame(0, 123),
         Frame('key1', 'value1'),
         Frame(1, null),
       ]);
-      var box = _getBox(keystore: keystore);
+      final box = _getBox(keystore: keystore);
 
       expect(box.values, [123, null, 'value1']);
     });
 
     group('.get()', () {
       test('returns defaultValue if key does not exist', () {
-        var backend = BackendMock();
-        var box = _getBox(backend: backend);
+        final backend = BackendMock();
+        final box = _getBox(backend: backend);
 
         expect(box.get('someKey'), null);
         expect(box.get('otherKey', defaultValue: -12), -12);
@@ -52,8 +52,8 @@ void main() {
       });
 
       test('returns cached value if it exists', () {
-        var backend = BackendMock();
-        var box = _getBox(
+        final backend = BackendMock();
+        final box = _getBox(
           backend: backend,
           keystore: Keystore.debug(frames: [
             Frame('testKey', 'testVal'),
@@ -68,9 +68,9 @@ void main() {
     });
 
     test('.getAt() returns value at given index', () {
-      var keystore =
+      final keystore =
           Keystore.debug(frames: [Frame(0, 'zero'), Frame('a', 'A')]);
-      var box = _getBox(keystore: keystore);
+      final box = _getBox(keystore: keystore);
 
       expect(box.getAt(0), 'zero');
       expect(box.getAt(1), 'A');
@@ -78,20 +78,20 @@ void main() {
 
     group('.putAll()', () {
       test('values', () async {
-        var backend = BackendMock();
-        var keystore = KeystoreMock();
+        final backend = BackendMock();
+        final keystore = KeystoreMock();
         when(keystore.frames).thenReturn([Frame('keystoreFrames', 123)]);
         when(keystore.beginTransaction(any)).thenReturn(true);
         when(backend.supportsCompaction).thenReturn(true);
 
-        var box = _getBox(
+        final box = _getBox(
           keystore: keystore,
           backend: backend,
           cStrategy: (a, b) => true,
         );
 
         await box.putAll({'key1': 'value1', 'key2': 'value2'});
-        var frames = [Frame('key1', 'value1'), Frame('key2', 'value2')];
+        final frames = [Frame('key1', 'value1'), Frame('key2', 'value2')];
         verifyInOrder([
           keystore.beginTransaction(frames),
           backend.writeFrames(frames),
@@ -101,11 +101,11 @@ void main() {
       });
 
       test('does nothing if no frames are provided', () async {
-        var backend = BackendMock();
-        var keystore = KeystoreMock();
+        final backend = BackendMock();
+        final keystore = KeystoreMock();
         when(keystore.beginTransaction([])).thenReturn(false);
 
-        var box = _getBox(backend: backend, keystore: keystore);
+        final box = _getBox(backend: backend, keystore: keystore);
 
         await box.putAll({});
         verify(keystore.beginTransaction([]));
@@ -113,19 +113,19 @@ void main() {
       });
 
       test('handles exceptions', () async {
-        var backend = BackendMock();
-        var keystore = KeystoreMock();
+        final backend = BackendMock();
+        final keystore = KeystoreMock();
 
         when(backend.writeFrames(any)).thenThrow('Some error');
         when(keystore.beginTransaction(any)).thenReturn(true);
 
-        var box = _getBox(backend: backend, keystore: keystore);
+        final box = _getBox(backend: backend, keystore: keystore);
 
         await expectLater(
-          () async => await box.putAll({'key1': 'value1', 'key2': 'value2'}),
+          () => box.putAll({'key1': 'value1', 'key2': 'value2'}),
           throwsA(anything),
         );
-        var frames = [Frame('key1', 'value1'), Frame('key2', 'value2')];
+        final frames = [Frame('key1', 'value1'), Frame('key2', 'value2')];
         verifyInOrder([
           keystore.beginTransaction(frames),
           backend.writeFrames(frames),
@@ -136,28 +136,28 @@ void main() {
 
     group('.deleteAll()', () {
       test('do nothing when deleting non existing keys', () async {
-        var backend = BackendMock();
-        var box = _getBox(backend: backend);
+        final backend = BackendMock();
+        final box = _getBox(backend: backend);
 
         await box.deleteAll(['key1', 'key2', 'key3']);
         verifyZeroInteractions(backend);
       });
 
       test('delete keys', () async {
-        var backend = BackendMock();
-        var keystore = KeystoreMock();
+        final backend = BackendMock();
+        final keystore = KeystoreMock();
         when(backend.supportsCompaction).thenReturn(true);
         when(keystore.beginTransaction(any)).thenReturn(true);
         when(keystore.containsKey(any)).thenReturn(true);
 
-        var box = _getBox(
+        final box = _getBox(
           backend: backend,
           keystore: keystore,
           cStrategy: (a, b) => true,
         );
 
         await box.deleteAll(['key1', 'key2']);
-        var frames = [Frame.deleted('key1'), Frame.deleted('key2')];
+        final frames = [Frame.deleted('key1'), Frame.deleted('key2')];
         verifyInOrder([
           keystore.containsKey('key1'),
           keystore.containsKey('key2'),
@@ -170,7 +170,7 @@ void main() {
     });
 
     test('.toMap()', () {
-      var box = _getBox(
+      final box = _getBox(
         keystore: Keystore.debug(frames: [
           Frame('key1', 1),
           Frame('key2', 2),

@@ -6,7 +6,7 @@ class BoxEvent {
   final dynamic value;
   final bool deleted;
 
-  BoxEvent(this.key, this.value, this.deleted);
+  BoxEvent(this.key, this.value, {@required this.deleted});
 
   @override
   bool operator ==(dynamic other) {

@@ -35,7 +35,7 @@ class StorageBackendJs extends StorageBackend {
 
   @visibleForTesting
   dynamic encodeValue(Frame frame) {
-    var value = frame.value;
+    final value = frame.value;
     if (crypto == null) {
       if (value == null) {
         return value;
@@ -53,7 +53,7 @@ class StorageBackendJs extends StorageBackend {
       }
     }
 
-    var frameWriter = BinaryWriterImpl(_registry);
+    final frameWriter = BinaryWriterImpl(_registry);
     frameWriter.writeByteList(bytePrefix, writeLength: false);
 
     if (crypto == null) {
@@ -62,17 +62,17 @@ class StorageBackendJs extends StorageBackend {
       frameWriter.writeEncrypted(value, crypto);
     }
 
-    var bytes = frameWriter.toBytes();
-    var sublist = bytes.sublist(0, bytes.length);
+    final bytes = frameWriter.toBytes();
+    final sublist = bytes.sublist(0, bytes.length);
     return sublist.buffer;
   }
 
   @visibleForTesting
   dynamic decodeValue(dynamic value) {
     if (value is ByteBuffer) {
-      var bytes = Uint8List.view(value);
+      final bytes = Uint8List.view(value);
       if (_isEncoded(bytes)) {
-        var reader = BinaryReaderImpl(bytes, _registry);
+        final reader = BinaryReaderImpl(bytes, _registry);
         reader.skip(2);
         if (crypto == null) {
           return reader.read();
@@ -87,15 +87,15 @@ class StorageBackendJs extends StorageBackend {
     }
   }
 
-  ObjectStore getStore(bool write, [String box = 'box']) {
+  ObjectStore getStore({@required bool write, String box = 'box'}) {
     return db
         .transaction(box, write ? 'readwrite' : 'readonly')
         .objectStore(box);
   }
 
   Future<List<dynamic>> getKeys() {
-    var completer = Completer<List<dynamic>>();
-    var request = getStore(false).getAllKeys(null);
+    final completer = Completer<List<dynamic>>();
+    final request = getStore(write: false).getAllKeys(null);
     request.onSuccess.listen((_) {
       completer.complete(request.result as List<dynamic>);
     });
@@ -106,10 +106,10 @@ class StorageBackendJs extends StorageBackend {
   }
 
   Future<Iterable<dynamic>> getValues() {
-    var completer = Completer<Iterable<dynamic>>();
-    var request = getStore(false).getAll(null);
+    final completer = Completer<Iterable<dynamic>>();
+    final request = getStore(write: false).getAll(null);
     request.onSuccess.listen((_) {
-      var values = (request.result as List).map(decodeValue);
+      final values = (request.result as List).map(decodeValue);
       completer.complete(values);
     });
     request.onError.listen((_) {
@@ -119,19 +119,19 @@ class StorageBackendJs extends StorageBackend {
   }
 
   @override
-  Future<int> initialize(
-      TypeRegistry registry, Keystore keystore, bool lazy) async {
+  Future<int> initialize(TypeRegistry registry, Keystore keystore,
+      {@required bool lazy}) async {
     _registry = registry;
-    var keys = await getKeys();
+    final keys = await getKeys();
     if (!lazy) {
       var i = 0;
-      var values = await getValues();
-      for (var value in values) {
-        var key = keys[i++];
+      final values = await getValues();
+      for (final value in values) {
+        final key = keys[i++];
         keystore.insert(Frame(key, value), notify: false);
       }
     } else {
-      for (var key in keys) {
+      for (final key in keys) {
         keystore.insert(Frame.lazy(key), notify: false);
       }
     }
@@ -141,14 +141,14 @@ class StorageBackendJs extends StorageBackend {
 
   @override
   Future<dynamic> readValue(Frame frame) async {
-    var value = await getStore(false).getObject(frame.key);
+    final value = await getStore(write: false).getObject(frame.key);
     return decodeValue(value);
   }
 
   @override
   Future<void> writeFrames(List<Frame> frames) async {
-    var store = getStore(true);
-    for (var frame in frames) {
+    final store = getStore(write: true);
+    for (final frame in frames) {
       if (frame.deleted) {
         await store.delete(frame.key);
       } else {
@@ -164,7 +164,7 @@ class StorageBackendJs extends StorageBackend {
 
   @override
   Future<void> clear() {
-    return getStore(true).clear();
+    return getStore(write: true).clear();
   }
 
   @override

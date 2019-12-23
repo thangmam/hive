@@ -8,25 +8,26 @@ import 'package:path/path.dart' as path_helper;
 
 class BackendManager implements BackendManagerInterface {
   @override
-  Future<StorageBackend> open(
-      String name, String path, bool crashRecovery, CryptoHelper crypto) async {
-    var dir = Directory(path);
+  Future<StorageBackend> open(String name, String path, CryptoHelper crypto,
+      {@required bool crashRecovery}) async {
+    final dir = Directory(path);
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
 
-    var file = await findHiveFileAndCleanUp(name, path);
-    var lockFile = File(path_helper.join(path, '$name.lock'));
+    final file = await findHiveFileAndCleanUp(name, path);
+    final lockFile = File(path_helper.join(path, '$name.lock'));
 
-    var backend = StorageBackendVm(file, lockFile, crashRecovery, crypto);
+    final backend =
+        StorageBackendVm(file, lockFile, crypto, crashRecovery: crashRecovery);
     await backend.open();
     return backend;
   }
 
   @visibleForTesting
   Future<File> findHiveFileAndCleanUp(String name, String path) async {
-    var hiveFile = File(path_helper.join(path, '$name.hive'));
-    var compactedFile = File(path_helper.join(path, '$name.hivec'));
+    final hiveFile = File(path_helper.join(path, '$name.hive'));
+    final compactedFile = File(path_helper.join(path, '$name.hivec'));
 
     if (await hiveFile.exists()) {
       if (await compactedFile.exists()) {
@@ -34,8 +35,8 @@ class BackendManager implements BackendManagerInterface {
       }
       return hiveFile;
     } else if (await compactedFile.exists()) {
-      print('Restoring compacted file.');
-      return await compactedFile.rename(hiveFile.path);
+      print('Restoring compacted file.'); // ignore: avoid_print
+      return compactedFile.rename(hiveFile.path);
     } else {
       await hiveFile.create();
       return hiveFile;
